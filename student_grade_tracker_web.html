@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Grade Tracker</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --warning-color: #e74c3c;
+            --background-color: #f9f9f9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        h1 {
+            margin-bottom: 10px;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 20px;
+        }
+        
+        h2 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 5px;
+        }
+        
+        form div {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button.add-grade {
+            background-color: var(--secondary-color);
+        }
+        
+        button.add-grade:hover {
+            background-color: #27ae60;
+        }
+        
+        button.remove-grade {
+            background-color: var(--warning-color);
+        }
+        
+        button.remove-grade:hover {
+            background-color: #c0392b;
+        }
+        
+        .grades-container {
+            margin-top: 10px;
+        }
+        
+        .grade-input {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .grade-input input {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        
+        .student-list {
+            margin-top: 20px;
+        }
+        
+        .student-card {
+            background-color: #f1f1f1;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .student-card h3 {
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+        
+        .student-grade {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            margin: 3px;
+        }
+        
+        .student-average {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--warning-color);
+            color: white;
+            border: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        .stats-card {
+            background-color: #e8f4fd;
+            margin-top: 20px;
+        }
+        
+        .stats-item {
+            margin-bottom: 10px;
+        }
+        
+        .stats-value {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .no-students {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Student Grade Tracker</h1>
+            <p>A tool for teachers to manage student grades and view statistics</p>
+        </header>
+
+        <div class="content">
+            <!-- Student Entry Form -->
+            <div class="left-panel">
+                <div class="card">
+                    <h2>Add New Student</h2>
+                    <form id="student-form">
+                        <div>
+                            <label for="student-name">Student Name:</label>
+                            <input type="text" id="student-name" required>
+                        </div>
+                        
+                        <div>
+                            <label>Grades:</label>
+                            <div id="grades-container" class="grades-container">
+                                <div class="grade-input">
+                                    <input type="number" class="grade" min="0" max="100" step="0.01" required placeholder="Enter grade (0-100)">
+                                    <button type="button" class="remove-grade">×</button>
+                                </div>
+                            </div>
+                            <button type="button" id="add-grade-btn" class="add-grade">+ Add Another Grade</button>
+                        </div>
+                        
+                        <div>
+                            <button type="submit">Add Student</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Student List and Statistics -->
+            <div class="right-panel">
+                <div class="card">
+                    <h2>Student Records</h2>
+                    <div id="student-list" class="student-list">
+                        <p class="no-students">No students have been added yet.</p>
+                    </div>
+                </div>
+
+                <div class="card stats-card">
+                    <h2>Class Statistics</h2>
+                    <div id="statistics">
+                        <div class="stats-item">
+                            <span>Total Students: </span>
+                            <span class="stats-value" id="total-students">0</span>
+                        </div>
+                        <div class="stats-item">
+                            <span>Class Average: </span>
+                            <span class="stats-value" id="class-average">N/A</span>
+                        </div>
+                        <div class="stats-item">
+                            <span>Highest Grade: </span>
+                            <span class="stats-value" id="highest-grade">N/A</span>
+                        </div>
+                        <div class="stats-item">
+                            <span>Lowest Grade: </span>
+                            <span class="stats-value" id="lowest-grade">N/A</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class Student {
+            constructor(name, grades) {
+                this.name = name;
+                this.grades = grades;
+                this.id = Date.now().toString(); // Generate unique ID
+            }
+
+            calculateAverage() {
+                if (this.grades.length === 0) return 0;
+                const sum = this.grades.reduce((total, grade) => total + grade, 0);
+                return sum / this.grades.length;
+            }
+        }
+
+        class StudentGradeTracker {
+            constructor() {
+                this.students = [];
+                // Load students from localStorage if available
+                this.loadFromLocalStorage();
+            }
+
+            addStudent(name, grades) {
+                const student = new Student(name, grades);
+                this.students.push(student);
+                this.saveToLocalStorage();
+                return student;
+            }
+
+            removeStudent(studentId) {
+                this.students = this.students.filter(student => student.id !== studentId);
+                this.saveToLocalStorage();
+            }
+
+            calculateStatistics() {
+                if (this.students.length === 0) {
+                    return {
+                        totalStudents: 0,
+                        classAverage: 'N/A',
+                        highestGrade: 'N/A',
+                        lowestGrade: 'N/A'
+                    };
+                }
+
+                const totalStudents = this.students.length;
+                
+                // Calculate class average
+                const averages = this.students.map(student => student.calculateAverage());
+                const classAverage = averages.reduce((total, avg) => total + avg, 0) / totalStudents;
+                
+                // Find highest and lowest grades
+                let highestGrade = -Infinity;
+                let lowestGrade = Infinity;
+                
+                this.students.forEach(student => {
+                    student.grades.forEach(grade => {
+                        if (grade > highestGrade) highestGrade = grade;
+                        if (grade < lowestGrade) lowestGrade = grade;
+                    });
+                });
+
+                return {
+                    totalStudents,
+                    classAverage: classAverage.toFixed(2),
+                    highestGrade: highestGrade !== -Infinity ? highestGrade.toFixed(2) : 'N/A',
+                    lowestGrade: lowestGrade !== Infinity ? lowestGrade.toFixed(2) : 'N/A'
+                };
+            }
+
+            saveToLocalStorage() {
+                localStorage.setItem('students', JSON.stringify(this.students));
+            }
+
+            loadFromLocalStorage() {
+                const savedStudents = localStorage.getItem('students');
+                if (savedStudents) {
+                    this.students = JSON.parse(savedStudents);
+                }
+            }
+        }
+
+        // Initialize the application
+        const gradeTracker = new StudentGradeTracker();
+        const studentForm = document.getElementById('student-form');
+        const studentNameInput = document.getElementById('student-name');
+        const gradesContainer = document.getElementById('grades-container');
+        const addGradeBtn = document.getElementById('add-grade-btn');
+        const studentList = document.getElementById('student-list');
+
+        // Add event listeners
+        studentForm.addEventListener('submit', handleAddStudent);
+        addGradeBtn.addEventListener('click', addGradeField);
+        document.querySelector('.remove-grade').addEventListener('click', removeGradeField);
+
+        // Render initial state
+        renderStudentList();
+        updateStatistics();
+
+        function handleAddStudent(e) {
+            e.preventDefault();
+            
+            const name = studentNameInput.value.trim();
+            if (!name) {
+                alert('Please enter a student name');
+                return;
+            }
+            
+            const gradeInputs = document.querySelectorAll('.grade');
+            const grades = [];
+            
+            for (const input of gradeInputs) {
+                const grade = parseFloat(input.value);
+                if (isNaN(grade) || grade < 0 || grade > 100) {
+                    alert('Please enter valid grades between 0 and 100');
+                    return;
+                }
+                grades.push(grade);
+            }
+            
+            // Add student to tracker
+            gradeTracker.addStudent(name, grades);
+            
+            // Reset form
+            studentForm.reset();
+            resetGradeFields();
+            
+            // Update UI
+            renderStudentList();
+            updateStatistics();
+        }
+
+        function addGradeField() {
+            const gradeInput = document.createElement('div');
+            gradeInput.className = 'grade-input';
+            gradeInput.innerHTML = `
+                <input type="number" class="grade" min="0" max="100" step="0.01" required placeholder="Enter grade (0-100)">
+                <button type="button" class="remove-grade">×</button>
+            `;
+            
+            gradesContainer.appendChild(gradeInput);
+            
+            // Add event listener to the new remove button
+            gradeInput.querySelector('.remove-grade').addEventListener('click', removeGradeField);
+        }
+
+        function removeGradeField(e) {
+            const gradeInputs = document.querySelectorAll('.grade-input');
+            if (gradeInputs.length > 1) {
+                e.target.parentElement.remove();
+            } else {
+                alert('You must have at least one grade field');
+            }
+        }
+
+        function resetGradeFields() {
+            // Clear all grade fields except the first one
+            const gradeInputs = document.querySelectorAll('.grade-input');
+            for (let i = 1; i < gradeInputs.length; i++) {
+                gradeInputs[i].remove();
+            }
+            
+            // Reset the first grade field
+            document.querySelector('.grade').value = '';
+        }
+
+        function renderStudentList() {
+            if (gradeTracker.students.length === 0) {
+                studentList.innerHTML = '<p class="no-students">No students have been added yet.</p>';
+                return;
+            }
+            
+            studentList.innerHTML = '';
+            
+            gradeTracker.students.forEach(student => {
+                const studentCard = document.createElement('div');
+                studentCard.className = 'student-card';
+                
+                // Create grades display
+                const gradesHTML = student.grades.map(grade => 
+                    `<span class="student-grade">${grade.toFixed(1)}</span>`
+                ).join('');
+                
+                studentCard.innerHTML = `
+                    <button class="delete-btn" data-id="${student.id}">×</button>
+                    <h3>${student.name}</h3>
+                    <div class="grades">
+                        ${gradesHTML}
+                    </div>
+                    <div class="student-average">
+                        Average: ${student.calculateAverage().toFixed(2)}
+                    </div>
+                `;
+                
+                studentList.appendChild(studentCard);
+                
+                // Add event listener to delete button
+                studentCard.querySelector('.delete-btn').addEventListener('click', () => {
+                    gradeTracker.removeStudent(student.id);
+                    renderStudentList();
+                    updateStatistics();
+                });
+            });
+        }
+
+        function updateStatistics() {
+            const stats = gradeTracker.calculateStatistics();
+            
+            document.getElementById('total-students').textContent = stats.totalStudents;
+            document.getElementById('class-average').textContent = stats.classAverage;
+            document.getElementById('highest-grade').textContent = stats.highestGrade;
+            document.getElementById('lowest-grade').textContent = stats.lowestGrade;
+        }
+    </script>
+</body>
+</html>
